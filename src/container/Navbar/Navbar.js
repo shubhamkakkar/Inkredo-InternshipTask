@@ -2,8 +2,8 @@ import React, { Component, Fragment } from "react"
 import { AppBar, Toolbar, Button, Grid } from "@material-ui/core";
 import { withRouter } from "react-router-dom"
 import { connect } from "react-redux";
-import { userLoggedIn } from "../../store/actions"
-
+import { userLoggedIn, companysList } from "../../store/actions"
+import axios from "axios"
 class Navigationbar extends Component {
 
     state = {
@@ -74,6 +74,7 @@ const mapStateToProps = ({ userLoggedIn }) => ({
 })
 const mapDispatchToProps = dispatch => ({
     sendAccessToken: accessToken => dispatch(userLoggedIn(accessToken)),
+    loadCompanyList: data => dispatch(companysList(data))
 
 })
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Navigationbar))

@@ -1,5 +1,5 @@
 import React, { Component } from "react"
-import { Grid, Avatar, Button, Dialog, TextField, DialogActions, DialogContent, DialogTitle, Typography, Card, CardContent, CardHeader } from "@material-ui/core"
+import { Grid, Avatar, Button, Dialog, TextField, DialogActions, DialogContent, DialogTitle, Card, CardContent, CardHeader } from "@material-ui/core"
 import { connect } from "react-redux";
 import { employeeInfoLoad, companysList } from "../../store/actions"
 import DivFlexGrow from "../../components/HOC/DivFlexGrow";
@@ -7,29 +7,57 @@ import { withRouter } from "react-router-dom"
 import PropTypes from 'prop-types';
 import CompanysComponent from "../../components/CompanysComponent/CompanysComponent"
 import withMobileDialog from '@material-ui/core/withMobileDialog';
+import axios from "axios"
+import staicUpdataCompany from '../Companys/companysData'
+
 class Profile extends Component {
 
     componentWillMount() {
-        const x = this.props.employeeInfo
-        if (
-            Object.keys(x).length
-        ) {
-            let value = []
-            value.push(x.employeeData.email)
-            value.push(x.employeeData.name)
-            value.push(x.employeeData.phoneNumber)
-            value.push(x.employeeData.currentCompany)
-            this.setState({ value, incompleteProfile: false })
-        }
 
-        const employeeCompany = this.props.employeeCompany
-        if (Object.keys(employeeCompany).length) {
-            let value = []
-            value.push(employeeCompany.name)
-            value.push(employeeCompany.location)
-            value.push(employeeCompany.description)
-            this.setState({ employeeCompany, companyInfo: value })
-        }
+        axios.get("https://inkredo-247ef.firebaseio.com/employeeData/" + localStorage.getItem("token") + ".json")
+            .then(res => {
+                let value = []
+                    value.push(res.data.email)
+                    value.push(res.data.name)
+                    value.push(res.data.phoneNumber)
+                    value.push(res.data.currentCompany)
+                this.setState({ value, incompleteProfile: false })
+
+            })
+            .catch(er => {
+                const x = this.props.employeeInfo
+                if (
+                    Object.keys(x).length
+                ) {
+                    let value = []
+                    value.push(x.employeeData.email)
+                    value.push(x.employeeData.name)
+                    value.push(x.employeeData.phoneNumber)
+                    value.push(x.employeeData.currentCompany)
+                    this.setState({ value, incompleteProfile: false })
+                }
+            })
+
+
+
+        axios.get("https://inkredo-247ef.firebaseio.com/employeeCompany/" + localStorage.getItem("token") + ".json")
+            .then(res => {
+                let value = []
+                value.push(res.data.name)
+                value.push(res.data.location)
+                value.push(res.data.description)
+                this.setState({ employeeCompany: res.data, companyInfo: value })
+            })
+            .catch(er => {
+                const employeeCompany = this.props.employeeCompany
+                if (Object.keys(employeeCompany).length) {
+                    let value = []
+                    value.push(employeeCompany.name)
+                    value.push(employeeCompany.location)
+                    value.push(employeeCompany.description)
+                    this.setState({ employeeCompany, companyInfo: value })
+                }
+            })
 
     }
     state = {
@@ -37,6 +65,7 @@ class Profile extends Component {
         openCompany: false,
         value: ["", "", "", ""],
         companyInfo: ["", "", ""],
+        newcompanyInfo: ["", "", ""],
         incompleteProfile: true,
         employeeCompany: undefined
     };
@@ -70,13 +99,16 @@ class Profile extends Component {
         }
     }
     handleSubmitCompany = () => {
-        const value = this.state.companyInfo
+        const value = this.state.newcompanyInfo
         const name = value[0]
         const location = value[1]
         const description = value[2]
         if (name.length && location.length && description.length) {
             const companyInfo = { name, location, description }
-            this.props.companysList(companyInfo)
+            // this.props.companysList(companyInfo)
+            staicUpdataCompany.push(companyInfo)
+            axios.put("https://inkredo-247ef.firebaseio.com/companysList.json", staicUpdataCompany).then(res => console.log("put")).catch(res => console.log(res))
+
             this.handleClose()
 
         } else {
@@ -97,11 +129,11 @@ class Profile extends Component {
     handleCompany = (index, e) => {
         if (e.target.value.trim().length) {
             this.setState({
-                companyInfo: { ...this.state.companyInfo, [index]: e.target.value }
+                newcompanyInfo: { ...this.state.newcompanyInfo, [index]: e.target.value }
             });
         } else {
             this.setState({
-                companyInfo: { ...this.state.companyInfo, [index]: "" }
+                newcompanyInfo: { ...this.state.newcompanyInfo, [index]: "" }
             });
         }
     };

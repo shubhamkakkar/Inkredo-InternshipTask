@@ -10,7 +10,7 @@ import CompanysComponent from "../../components/CompanysComponent/CompanysCompon
 import DivFlexGrow from "../../components/HOC/DivFlexGrow"
 import Loading from "../../components/Loading/Loading"
 import Navbar from "../Navbar/Navbar";
-
+import axios from "axios"
 
 const styles = theme => ({
     title: {
@@ -25,21 +25,35 @@ class Companys extends Component {
 
     state = {
         open: false,
+        dashboardContentIndex: undefined,
         dashboardContent: undefined,
-        accessToken: ""
+        accessToken: "",
+        companysData: []
     }
 
     componentWillMount() {
-        this.props.loadCompanysList(companysData)
-        this.setState({ accessToken: this.props.accessToken })
+        axios.get("https://inkredo-247ef.firebaseio.com/companysList.json")
+            .then(res => this.props.loadCompanysList(res.data))
+            .catch(res =>
+                this.props.loadCompanysList(companysData)
+            )
+
+    }
+
+    componentDidMount() {
+        this.setState({
+            accessToken: this.props.accessToken,
+            companysData: this.props.companysData
+        })
     }
     showDashboard = index => {
         this.setState({
             open: true,
-            dashboardContent: this.props.companysData[index]
+            dashboardContent: this.props.companysData[index],
+            dashboardContentIndex: index
         });
     }
-  
+
     handleClose = () => {
         this.setState({ open: false });
     };
@@ -47,7 +61,8 @@ class Companys extends Component {
         if (this.state.accessToken.length) {
             const toJoinCompanyData = this.props.companysData[index]
             this.props.employeeCompany(toJoinCompanyData)
-
+            alert("Joined Successfully")
+            this.handleClose()
         } else {
             alert("Login/Signup First")
             this.props.history.push("/loginsignup")
@@ -104,6 +119,7 @@ class Companys extends Component {
                                         description={this.state.dashboardContent.description}
                                         customColor={this.props.classes.title}
                                         showDashboard={this.hadleClose}
+                                        joinUs={() => this.joinUs(this.state.dashboardContentIndex)}
                                     />
                                 </Grid>
                             </Dialog>
