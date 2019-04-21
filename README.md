@@ -1,3 +1,10 @@
+## The browser might prohibit opening of the link due to a surge, go to advance options, towards the end of the same browser window and hit allow to access the project's working link  
+
+
+
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
